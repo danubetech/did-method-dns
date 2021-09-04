@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>did:dns Method Specification</title>
+    <script src="https://www.w3.org/Tools/respec/respec-w3c" async class="remove"></script>
+    <script class="remove">
+        var respecConfig = {
+            specStatus: "unofficial",
+            shortName: "did-method-dns",
+            group: "credentials",
+            editors: [{
+                name: "Markus Sabadello",
+                url: "https://www.linkedin.com/in/markus-sabadello-353a0821",
+                company: "Danube Tech",
+                companyURL: "https://danubetech.com/",
+                w3cid: 46729
+            }],
+            authors: [
+                {
+                    name: "Markus Sabadello",
+                    url: "https://www.linkedin.com/in/markus-sabadello-353a0821",
+                    company: "Danube Tech",
+                    companyURL: "https://danubetech.com/",
+                    w3cid: 46729
+                }],
+            github: "https://github.com/danubetech/did-method-dns",
+
+            localBiblio: {
+                "DID-PRIMER": {
+                    title: "DID Primer",
+                    href: "https://github.com/WebOfTrustInfo/rebooting-the-web-of-trust-fall2017/blob/master/topics-and-advance-readings/did-primer.md",
+                    authors: [
+                        "Drummond Reed",
+                        "Manu Sporny",
+                    ],
+                    publisher: "Rebooting the Web of Trust 2017"
+                },
+                "DID-WEB": {
+                    title: "did:web Method Specification",
+                    href: "https://w3c-ccg.github.io/did-method-web/",
+                    editors: [
+                        "Michael Prorock",
+                        "Orie Steele",
+                        "Oliver Terbu"
+                    ],
+                    status: "Draft Community Group",
+                    publisher: "W3C Credentials Community Group"
+                },
+                "DID-KEY": {
+                    title: "did:key Method Specification",
+                    href: "https://w3c-ccg.github.io/did-method-key/",
+                    editors: [
+                        "Manu Sporny",
+                        "Dmitri Zagidulin",
+                        "Dave Longley",
+                        "Orie Steele"
+                    ],
+                    status: "Unofficial Draft",
+                    publisher: "W3C Credentials Community Group"
+                },
+                "DID-IN-DNS": {
+                    title: "The Decentralized Identifier (DID) in the DNS",
+                    href: "https://tools.ietf.org/html/draft-mayrhofer-did-dns-01",
+                    authors: ["A. Mayrhofer", "D. Klesev", "M. Sabadello"],
+                    status: "Internet Draft",
+                    publisher: "IETF"
+                },
+                "WELL-KNOWN-DID": {
+                    title: "Well Known DID Configuration",
+                    href: "https://identity.foundation/specs/did-configuration/",
+                    editors: [
+                        "D. Buchner",
+                        "O. Steele",
+                        "T. Looker"
+                    ],
+                    status: "Approved Deliverable",
+                    publisher: "DIF"
+                },
+                "DNSSEC": {
+                    title: "Well Known DID Configuration",
+                    href: "https://identity.foundation/specs/did-configuration/",
+                    editors: [
+                        "D. Buchner",
+                        "O. Steele",
+                        "T. Looker"
+                    ],
+                    status: "Approved Deliverable",
+                    publisher: "DIF"
+                }
+            },
+        };
+    </script>
+</head>
+<body>
+<section id="abstract">
+    <p>
+        Many early DID methods were based on distributed ledgers or other decentralized infrastructure, and some of
+        those still remain popular. However, the DID community has also seen a lot of innovation and has come up with
+        new types of DID methods. One of them is <code>did:web</code>, which is based on traditional DNS and web
+        server infrastructure. The DID method presented here is <code>did:dns</code>, which follows a similar
+        idea but offers several improvements over <code>did:web</code>.
+    </p>
+</section>
+<section id="sotd">
+</section>
+<section>
+    <h1>
+        Introduction
+    </h1>
+    <section>
+        <h2>
+            Preface
+        </h2>
+        <p>
+            The <code>did:dns</code> method specification conforms to the requirements specified in the
+            Decentralized Identifiers v1.0 Specification [[DID-CORE]]. For more
+            information about DIDs and DID method specifications, please also see the
+            [[?DID-PRIMER]].
+        </p>
+    </section>
+    <section id="conformance">
+        <!-- This section is filled automatically by ReSpec. -->
+    </section>
+    <section>
+        <h2>
+            Example
+        </h2>
+
+        <pre class="example nohighlight" title="Example DIDs">
+did:dns:danubetech.com
+did:dns:danubetech.github.io
+        </pre>
+
+        <pre class="example" title="Example DNS zone file entries">
+            key1._did.danubetech.com. IN URI 100 10 "did:key:z6MkuQDRydsRjUgkyX81RUnF6wfd6hXpGih1tenaCCR6mb7E"
+        </pre>
+
+        <pre class="example" title="Example DID document">
+{
+  "@context": "https://www.w3.org/ns/did/v1",
+  "id": "did:dns:danubetech.com",
+  "verificationMethod": [{
+      "id": "did:dns:danubetech.com#key1",
+      "type": "Ed25519VerificationKey2018",
+      "publicKeyBase58": "FwxPPPczPwCHs2HJjupQFr7dH8FxrqSfCdseMvT5rNKr"
+  }],
+  "authentication": [
+     "did:dns:danubetech.com#key1"
+  ],
+  "assertionMethod": [
+     "did:dns:danubetech.com#key1"
+  ]
+}
+        </pre>
+    </section>
+</section>
+
+<section>
+    <h1>
+        did:dns Method Specification
+    </h1>
+
+    <section>
+        <h2>
+            Target system
+        </h2>
+        <p>
+            The target system of the <code>did:dns</code> method is the Domain Name System (DNS), or more specifically,
+            the set (or chain) of DNS zone files controlled by the authoritative DNS servers of the domain
+            name that is the method-specific identifier in the DID.
+        </p>
+    </section>
+
+    <section>
+        <h2>
+            Method name
+        </h2>
+        <p>
+            The method name that shall identify this DID method is: <code>dns</code>.
+
+            A DID that uses this method MUST begin with the following prefix:
+            <code>did:dns</code>. Per the DID specification, this string MUST be in
+            lowercase.
+        </p>
+    </section>
+
+    <section>
+        <h2>
+            Method-specific identifier
+        </h2>
+        <p>
+            The method specific identifier is a fully qualified domain name.
+            The formal rules describing valid domain name syntax are described in
+            [[RFC1035]], [[RFC1123]], and [[RFC2181]].
+        </p>
+        <p>
+            The domain name name may consist of an arbitrary number of subdomains.
+        </p>
+
+        <pre class="nohighlight">
+dns-did = "did:dns:" domain-name
+        </pre>
+    </section>
+
+    <section>
+        <h2>
+            DID method operations
+        </h2>
+        <section>
+            <h3>
+                Create
+            </h3>
+            <p>
+                Creating a DID is done by:
+            </p>
+            <ol>
+                <li>
+                    Registering a domain name or subdomain via traditional means (e.g. using the services
+                    of a domain name registrar, who in turn may use EPP or other protocols).
+                </li>
+                <li>
+                    Configuring the domain name's authoritative DNS zone file to include Resource Records (RRs) following
+                    the patterns described in the <a href="#resolve"></a> section.
+                </li>
+            </ol>
+
+        </section>
+
+        <section>
+            <h3>
+                Resolve
+            </h3>
+            <p>
+                The following steps MUST be executed to resolve a DID to a DID document using the
+                <code>did:dns</code> method.
+            </p>
+
+            <ol>
+                <li>
+                    Create an empty DID document, called the <var>resolved DID document</var>.
+                </li>
+                <li>
+                    Set the value of the <code>id</code> property of the <var>resolved DID document</var> to
+                    the DID that is being resolved.
+                </li>
+                <li>
+                    Resolve the domain name in the DID's method-specific identifier to look up
+                    Resource Records (RRs) associated with the domain name.
+                    <p class="note">
+                        This step SHOULD use DNSSEC and other security mechanisms. See
+                        sections <a href="#relation-to-dnssec-0"></a> and
+                        <a href="#security-and-privacy-considerations"></a>.
+                    </p>
+                </li>
+                <li>
+                    If the domain name does not exist, the DID is considered to not exist either, and a
+                    <code>notFound</code> error MUST be returned by the resolution process, as defined in
+                    [[DID-CORE]].
+                </li>
+                <li>
+                    Look up RRs matching the following conditions, and follow the corresponding rules to construct
+                    the <var>resolved DID document</var>:
+                    <ul>
+                        <li>
+                            Verification Methods: For each RR that meets the following conditions:
+                            <ol>
+                                <li>
+                                    The value of the <strong>TYPE</strong> field is <code>URI</code>.
+                                </li>
+                                <li>
+                                    The value of the <strong>NAME</strong> field matches the following pattern:
+                                    <pre>
+                                        &lt;id&gt;._did.&lt;method-specific-id&gt;.
+                                    </pre>
+                                </li>
+                                <li>
+                                    The value of the <strong>RDATA</strong> field is a string that is a
+                                    <code>did:key</code> DID according to the [[DID-KEY]] specification.
+                                </li>
+                            </ol>
+                            Perform the following steps:
+                            <ol>
+                                <li>
+                                    Resolve the DID in the <strong>RDATA</strong> field to a DID document, according
+                                    to the [[DID-KEY]]
+                                    specification. The result is called the <var>verification method DID document</var>.
+                                </li>
+                                <li>
+                                    Copy the verification method from the <var>verification method DID document</var>
+                                    to the <var>resolved DID document</var>. This is called the
+                                    <var>resolved verification method</var>.
+                                </li>
+                                <li>
+                                    Set the value of the <code>id</code>
+                                    property in the <var>resolved verification method</var> as follows, using the
+                                    <code>&lt;id&gt;</code> part of the value of the <strong>NAME</strong> field:
+                                    <pre>
+                                        "id": "&lt;method-specific-id&gt;#&lt;id&gt;"
+                                    </pre>
+                                </li>
+                                <li>
+                                    Construct appropriate verification relationships (<code>authentication</code>,
+                                    <code>assertionMethod</code>) in the <var>resolved DID document</var>.
+                                    The value of the verification relationship is a set
+                                    containing the value of <code>id</code> property of the
+                                    <var>resolved verification method</var>.
+                                    <p class="issue">
+                                        TODO: Need to decide if/how to explicitly express verification relationships
+                                        (<code>authentication</code>, <code>assertionMethod</code>, etc.).
+                                    </p>
+                                </li>
+                            </ol>
+                        </li>
+                        <li>
+                            Services: For each RR that meets the following conditions:
+                            <ol>
+                                <li>
+                                    The value of the <strong>TYPE</strong> field is <code>URI</code>.
+                                </li>
+                                <li>
+                                    The value of the <strong>NAME</strong> field matches the following pattern:
+                                    <pre>
+                                        &lt;id&gt;.&lt;type&gt;._did.&lt;method-specific-id&gt;.
+                                    </pre>
+                                </li>
+                                <li>
+                                    The value of the <strong>RDATA</strong> field is any valid URI, EXCEPT
+                                    a <code>did:key</code> DID.
+                                </li>
+                            </ol>
+                            Perform the following steps:
+                            <ol>
+                                <li>
+                                    Construct a service property in the <var>resolved DID document</var>. This is called
+                                    the <var>resolved service</var>.
+                                </li>
+                                <li>
+                                    Set the value of the <code>id</code>
+                                    property in the <var>resolved service</var> as follows, using the
+                                    <code>&lt;id&gt;</code> part of the value of the <strong>NAME</strong> field:
+                                    <pre>
+                                        "id": "&lt;method-specific-id&gt;#&lt;id&gt;"
+                                    </pre>
+                                </li>
+                                <li>
+                                    Set the value of the <code>type</code>
+                                    property in the <var>resolved service</var> to the <code>&lt;type&gt;</code> part
+                                    of the value of the <strong>NAME</strong> field.
+                                </li>
+                                <li>
+                                    Set the value of the <code>serviceEndpoint</code>
+                                    property in the <var>resolved service</var> to the
+                                    value of the <strong>RDATA</strong> field.
+                                </li>
+                            </ol>
+                        </li>
+                        <li>
+                            All other RRs MUST be ignored during the DID document construction step.
+                        </li>
+                    </ul>
+                </li>
+            </ol>
+        </section>
+
+        <section>
+            <h3>
+                Update
+            </h3>
+            <p>
+                To update the DID document, the domain name's authoritative DNS zone file is updated with Resource
+                Records (RRs) that follow the patterns described in the <a href="#resolve"></a> section.
+            </p>
+            <p class="note">
+                See considerations in <a href="#did-document-updates"></a>.
+            </p>
+        </section>
+
+        <section>
+            <h3>
+                Deactivate
+            </h3>
+            <p>
+                To deactivate the DID document, the domain is deleted.
+            </p>
+            <p class="note">
+                See considerations in <a href="#did-document-deactivation"></a>.
+            </p>
+            <p class="issue">
+                Discuss if there should be a way to explicitly mark a domain name as "deactivated".
+            </p>
+        </section>
+    </section>
+
+</section>
+
+<section class="informative">
+    <h2>
+        Relation to other technologies
+    </h2>
+
+    <section>
+        <h3>
+            Relation to the did:web method
+        </h3>
+        <p>
+            Similar to this specification, [[?DID-WEB]] also defines a new DID method based on domain names. The syntax
+            of the identifiers is equivalent with the exceptions that 1. the method name in this specification is
+            <code>dns</code> instead of
+            <code>web</code>, and 2. the <code>did:web</code> method also allows an optional colon-separated path
+            component as part of its method-specific identifier, which is not supported by this specification. In terms
+            of functionality, the main difference between the two methods is that while the <code>did:web</code>
+            method requires both DNS and web infrastructure for its operation, the <code>did:dns</code> method requires
+            only DNS infrastructure.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            Relation to DID-in-DNS
+        </h3>
+        <p>
+            The [[?DID-IN-DNS]] specification also provides a way to connect existing DNS infrastructure with DIDs. It
+            uses similar Resource Records (RRs). It
+            however does not define a new DID method specification; rather, it defines a way for discovering a DID
+            (using any DID method) from a domain name, using the DNS infrastructure and protocol. This is intended for
+            use cases where a domain name is used for bootstrapping initial relationships or interactions, but the
+            domain name is not intended to be used beyond such an initial step.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            Relation to .well-known
+        </h3>
+        <p>
+            Similar to [[?DID-IN-DNS]], the [[?WELL-KNOWN-DID]] specification also does not define a new DID method and
+            is rather used for discovery of a DID using an existing domain name. It uses web server infrastructure
+            in addition to DNS as the actual discovery mechanism.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            Relation to DKIM
+        </h3>
+        <p>
+            This specification fulfills a similar purpose as DKIM insofar as it also associates public keys with
+            domain names, using Resource Records (RRs). However, while DKIM is focused on a single use case
+            (e-mail), this specification can be used with any service and protocol that supports DIDs.
+        </p>
+        <p>
+            DKIM uses <strong>TXT</strong> RRs, while this DID method specification uses
+            <strong>URI</strong> RRs.
+        </p>
+        <p>
+            It would be possible to define a DID method that uses DKIM keys directly in a DID document.
+            However, in this DID method specification, we have chosen to keep DID document keys independent of
+            DKIM keys.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            Relation to DNSSEC
+        </h3>
+        <p>
+            Similar to this specification as well as DKIM, DNSSEC also associates public keys with domain names.
+            DNSSEC does this for the purpose of securing the resolution process of domain names themselves.
+            It is highly RECOMMENDED that DNSSEC is used when resolving domain names during the <a href="#resolve"></a>
+            operation.
+        </p>
+        <p>
+            DNSSEC uses <strong>DNSKEY</strong> RRs, while this DID method specification uses
+            <strong>URI</strong> RRs.
+        </p>
+        <p>
+            It would be possible to define a DID method that uses DNSSEC keys directly in a DID document.
+            However, in this DID method specification, we have chosen to keep DID document keys independent of
+            DNSSEC keys.
+        </p>
+    </section>
+</section>
+
+<section class="informative">
+    <h2>
+        Security and privacy considerations
+    </h2>
+
+    <section>
+        <h3>
+            DNS Security Considerations
+        </h3>
+        <p class="note" title="Applies similarly to did:web">
+            This section was copied and adapted from the [[?DID-WEB]] specification, since
+            similar considerations apply in both DID methods.
+        </p>
+        <p>
+            DNS presents many of the attack vectors that enable active security and privacy
+            attacks on the <code>did:dns</code> method, and it's important that implementors address these
+            concerns via proper configuration of DNS. For example, without proper security
+            of the DNS resolution via <a href="https://tools.ietf.org/html/rfc8484">DNS over HTTPS</a> it's possible for
+            active attackers to intercept the result of the DNS resolution via a Man in the
+            Middle attack which would point at a malicious server with the incorrect DID
+            document.
+        </p>
+        <p>
+            Additionally, implementors should be aware of issues presented by a Spoofed DNS
+            records where the record returned by a malicious DNS Server is inauthentic and
+            allows the record to be pointed at a malicious server which contains a different
+            DID Document. To prevent this type of issue, usage of DNSSEC which is defined in
+            <a href="https://tools.ietf.org/html/rfc4033">RFC4033</a>,
+            <a href="https://tools.ietf.org/html/rfc4034">RFC4034</a>, and
+            <a href="https://tools.ietf.org/html/rfc4035">RFC4035</a>.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            DNS Privacy Considerations
+        </h3>
+        <p class="note" title="Applies similarly to did:web">
+            This section was copied and adapted from the [[?DID-WEB]] specification, since
+            similar considerations apply in both DID methods.
+        </p>
+        <p>
+            Due to the nature of the <code>did:dns</code> method relying upon a DNS in order to resolve
+            the DID, all resolutions of a did:dns identifier have the potential to be
+            tracked by a DNS provider. To mitigate the
+            issue of the relying party being tracked when resolving the DID document, the
+            relying party should look to either use a trusted Universal Resolver service to
+            gain herd privacy, utilize a VPN service or perform a resolution over the TOR
+            network. Another emerging solution that will be useful to address this is <a
+                href="https://tools.ietf.org/html/draft-pauly-dprive-oblivious-doh-03">
+            draft-pauly-dprive-oblivious-doh-03</a>
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            DID Document Integrity Verification
+        </h3>
+
+        <p class="issue" title="Hashlinks">
+            Add discussion of using <a
+                href="https://tools.ietf.org/html/draft-sporny-hashlink">Hashlinks</a> and the
+            <code>hl</code> DID parameter to aid
+            integrity protection and verification of the DID document.
+        </p>
+
+    </section>
+
+    <section>
+        <h3>
+            DID Document Auditing and History
+        </h3>
+        <p>
+            The DID operations defined in this specification do not provide an immutable history of changes that is
+            typical for blockchain/DLT based DID methods, and which can be used for auditing purposes. This can lead
+            to certain attacks where the DID document is manipulated temporarily, or different DID documents are
+            presented to different resolvers, without an easy way to detect this behavior.
+        </p>
+        <p class="issue">
+            Add further discussion and possible mitigations.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            DID Document Updates
+        </h3>
+        <p>
+            Updates to a DID document may not be immediately visible to all resolvers, since standard DNS caching
+            mechanisms (e.g. TTL values) apply.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            DID Document Deactivation
+        </h3>
+        <p>
+            If a domain name is deleted, similar to when it is updated, the deletion may not be immediately visible,
+            since standard DNS caching mechanisms (e.g. TTL values) apply.
+        </p>
+        <p>
+            In some cases, if a domain name is deleted, grace periods may apply during which a domain name can be
+            restored.
+        </p>
+        <p>
+            If a domain is deleted, it may in the future be registered by another entity. This is known as the
+            "identifier recycling problem". It means that it cannot be assumed that a DID is a persistent identifier
+            for the same DID subject.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            Authorization of DID Operations
+        </h3>
+        <p>
+            Unlike some other DID methods, this one does not use the DID document for
+            authorization decisions of create/update/deactivate operations on the DID. This depends on
+            authorization mechanisms of the underlying DNS infrastructure. In other words, the authority to update
+            the domain name is linked to the authority to update the DID document.
+        </p>
+    </section>
+</section>
+
+<section class="appendix informative">
+    <h1>
+        Reference implementations
+    </h1>
+    <p>
+        It is expected that the DIF Universal Resolver project will add an implementation (a "driver") that supports
+        the <code>did:dns</code> method. Other implementations are encouraged as well.
+    </p>
+</section>
+</body>
+</html>
