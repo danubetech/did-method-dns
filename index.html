@@ -132,7 +132,7 @@ did:dns:danubetech.com
 did:dns:support.examplecompany.com
         </pre>
 
-        <pre class="example" title="Example DNS zone file entries">
+        <pre class="example" title="Example DNS zone file entry">
             key1._did.danubetech.com. IN URI 100 10 "did:key:z6MkuQDRydsRjUgkyX81RUnF6wfd6hXpGih1tenaCCR6mb7E"
         </pre>
 
@@ -253,7 +253,7 @@ dns-did = "did:dns:" domain-name
                     <p class="note">
                         This step SHOULD use DNSSEC and other security mechanisms. See
                         sections <a href="#relation-to-dnssec"></a> and
-                        <a href="#security-and-privacy-considerations"></a>.
+                        <a href="#security-considerations"></a>.
                     </p>
                 </li>
                 <li>
@@ -487,7 +487,7 @@ dns-did = "did:dns:" domain-name
 
 <section class="informative">
     <h2>
-        Security and privacy considerations
+        Security considerations
     </h2>
 
     <section>
@@ -515,27 +515,6 @@ dns-did = "did:dns:" domain-name
             <a href="https://tools.ietf.org/html/rfc4033">RFC4033</a>,
             <a href="https://tools.ietf.org/html/rfc4034">RFC4034</a>, and
             <a href="https://tools.ietf.org/html/rfc4035">RFC4035</a>.
-        </p>
-    </section>
-
-    <section>
-        <h3>
-            DNS Privacy Considerations
-        </h3>
-        <p class="note" title="Applies similarly to did:web">
-            This section was copied and adapted from the [[?DID-WEB]] specification, since
-            similar considerations apply in both DID methods.
-        </p>
-        <p>
-            Due to the nature of the <code>did:dns</code> method relying upon a DNS in order to resolve
-            the DID, all resolutions of a did:dns identifier have the potential to be
-            tracked by a DNS provider. To mitigate the
-            issue of the relying party being tracked when resolving the DID document, the
-            relying party should look to either use a trusted Universal Resolver service to
-            gain herd privacy, utilize a VPN service or perform a resolution over the TOR
-            network. Another emerging solution that will be useful to address this is <a
-                href="https://tools.ietf.org/html/draft-pauly-dprive-oblivious-doh-03">
-            draft-pauly-dprive-oblivious-doh-03</a>
         </p>
     </section>
 
@@ -617,6 +596,60 @@ dns-did = "did:dns:" domain-name
             The DID Working Group has extensively discussed the meaning of "decentralized" identifiers, and various
             aspects of this terms. In a traditional sense, a domain name may not be considered a decentralized
             identifier. For further considerations, see [[?DID-RUBRIC]].
+        </p>
+    </section>
+</section>
+
+<section class="informative">
+    <h2>
+        Privacy considerations
+    </h2>
+
+    <section>
+        <h3>
+            DNS Privacy Considerations
+        </h3>
+        <p class="note" title="Applies similarly to did:web">
+            This section was copied and adapted from the [[?DID-WEB]] specification, since
+            similar considerations apply in both DID methods.
+        </p>
+        <p>
+            Due to the nature of the <code>did:dns</code> method relying upon a DNS in order to resolve
+            the DID, all resolutions of a <code>did:dns</code> identifier have the potential to be
+            tracked by a DNS provider. To mitigate the
+            issue of the relying party being tracked when resolving the DID document, the
+            relying party should look to either use a trusted Universal Resolver service to
+            gain herd privacy, utilize a VPN service or perform a resolution over the TOR
+            network. Another emerging solution that will be useful to address this is <a
+                href="https://tools.ietf.org/html/draft-pauly-dprive-oblivious-doh-03">
+            draft-pauly-dprive-oblivious-doh-03</a>
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            Domain Name String
+        </h3>
+        <p>
+            The domain name string itself often gives a hint about the identity of the registrant. This is in fact
+            usually a desired property of human-readable identifiers such as domain names, especially for
+            organizations.
+        </p>
+        <p>
+            For individuals however, the use of a domain name as a basis for a DID can negatively
+            impact their privacy, since (unlike other DID methods) it might be possible to learn about the identity
+            of the subject purely from the DID itself, even without DID resolution or other interaction.
+        </p>
+    </section>
+
+    <section>
+        <h3>
+            Whois Data
+        </h3>
+        <p>
+            The WHOIS protocol (see [[RFC3912]]) typically allows anyone to query DNS registries for human-readable
+            records about registrants of a domain name. This can be mitigated by domain privacy services that hide
+            the registrant's information from the WHOIS records.
         </p>
     </section>
 </section>
