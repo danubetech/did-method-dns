@@ -133,7 +133,7 @@ did:dns:support.examplecompany.com
         </pre>
 
         <pre class="example" title="Example DNS zone file entry">
-            key1._did.danubetech.com. IN URI 100 10 "did:key:z6MkjvBkt8ETnxXGBFPSGgYKb43q7oNHLX8BiYSPcXVG6gY6"
+            _key1._did.danubetech.com. IN URI 100 10 "did:key:z6MkjvBkt8ETnxXGBFPSGgYKb43q7oNHLX8BiYSPcXVG6gY6"
         </pre>
 
         <pre class="example" title="Example DID document">
@@ -274,7 +274,7 @@ dns-did = "did:dns:" domain-name
                                 <li>
                                     The value of the <strong>NAME</strong> field matches the following pattern:
                                     <pre>
-                                        &lt;id&gt;._did.&lt;method-specific-id&gt;.
+                                        _&lt;id&gt;._did.&lt;method-specific-id&gt;.
                                     </pre>
                                 </li>
                                 <li>
@@ -324,7 +324,7 @@ dns-did = "did:dns:" domain-name
                                 <li>
                                     The value of the <strong>NAME</strong> field matches the following pattern:
                                     <pre>
-                                        &lt;id&gt;.&lt;type&gt;._did.&lt;method-specific-id&gt;.
+                                        _&lt;id&gt;._&lt;type&gt;._did.&lt;method-specific-id&gt;.
                                     </pre>
                                 </li>
                                 <li>
