@@ -434,12 +434,15 @@ dns-did = "did:dns:" domain-name
 
     <section>
         <h3>
-            Relation to .well-known
+            Relation to Well Known DID Configuration
         </h3>
         <p>
             Similar to [[?DID-IN-DNS]], the [[?WELL-KNOWN-DID]] specification also does not define a new DID method and
-            is rather used for discovery of a DID using an existing domain name. It uses web server infrastructure
-            in addition to DNS as the actual discovery mechanism.
+            is rather used for discovery of a DID (using any DID method) via an existing domain name.
+        </p>
+        <p>
+            As the discovery
+            mechanism, it uses a <code>/.well-known/</code> path (see [[RFC8615]]) on a web server in addition to DNS.
         </p>
     </section>
 
